@@ -4,17 +4,7 @@ const jwt = require("jsonwebtoken");
 const HttpError = require("../models/http-error");
 const User = require("../models/user");
 
-// const DUMMY_USERS = [
-//   {
-//     id: "u1",
-//     name: "Maria shaikh",
-//     email: "test@test.com",
-//     password: "testers",
-//   },
-// ];
-
 const getUsers = async (req, res, next) => {
-  //   res.json({ users: DUMMY_USERS });
   let users;
   try {
     users = await User.find({}, "-password");
@@ -33,10 +23,6 @@ const signup = async (req, res, next) => {
   }
   const { name, email, password } = req.body;
 
-  //   const hasUser = DUMMY_USERS.find((u) => u.email === email);
-  //   if (hasUser) {
-  //     throw new HttpError("could not create user, user already exists", 422);
-  //   }
   let existingUser;
   try {
     existingUser = await User.findOne({ email: email }); //this is an async task, so in try catch
@@ -49,13 +35,6 @@ const signup = async (req, res, next) => {
     const error = new HttpError("User already exists, try loggin in", 422);
     return next(error);
   }
-
-  //   const createdUser = {
-  //     id: uuid.v4(),
-  //     name,
-  //     email,
-  //     password,
-  //   };
 
   let hashedPassword;
   try {
@@ -72,8 +51,6 @@ const signup = async (req, res, next) => {
     password: hashedPassword,
     places: [],
   });
-
-  //   DUMMY_USERS.push(createdUser);
 
   try {
     await createdUser.save(); //handles everything related to saving the data in db, returns a promise
@@ -101,11 +78,6 @@ const signup = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
-
-  //   const identifiedUser = DUMMY_USERS.find((u) => u.email === email);
-  //   if (!identifiedUser || identifiedUser.password !== password) {
-  //     throw new HttpError("could not identify user, wrong credentials", 401);
-  //   }
 
   let existingUser;
   try {
