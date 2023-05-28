@@ -52,7 +52,7 @@ app.use((error, req, res, next) => {
 
 mongoose
   .connect(
-    "mongodb+srv://mariakhedwala:4OXsJ1acGjwmFU5A@cluster0.aduoemu.mongodb.net/mern?retryWrites=true&w=majority"
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.aduoemu.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`
   ) //returns a promise as it is an async task
   .then(() => {
     app.listen(8000);
