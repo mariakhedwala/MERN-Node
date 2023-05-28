@@ -9,25 +9,8 @@ const Place = require("../models/place");
 const User = require("../models/user");
 const mongoose = require("mongoose");
 
-// let DUMMY_PLACES = [
-//   {
-//     id: "p1",
-//     title: "Empire state building",
-//     description: "lorem Empire state building",
-//     location: {
-//       lat: 40.7484474,
-//       lng: -73.98715116,
-//     },
-//     address: "abs sdoj sojaas, NY 10001",
-//     creator: "u1",
-//   },
-// ];
-
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pid;
-  //   const place = DUMMY_PLACES.find((p) => {
-  //     return p.id === placeId;
-  //   });
   let place;
   try {
     place = await Place.findById(placeId);
@@ -47,10 +30,6 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = async (req, res, next) => {
   const userId = req.params.uid;
-
-  //   const places = DUMMY_PLACES.filter((p) => {
-  //     return p.creator === userId;
-  //   });
 
   let userWithPlaces;
   try {
@@ -86,15 +65,6 @@ const createPlace = async (req, res, next) => {
     return next(error);
   }
 
-  //   const createdPlace = {
-  //     id: uuid.v4(),
-  //     title,
-  //     description,
-  //     location: coordinates,
-  //     address,
-  //     creator,
-  //   };
-
   const createdPlace = new Place({
     title,
     description,
@@ -103,8 +73,6 @@ const createPlace = async (req, res, next) => {
     image: req.file.path,
     creator,
   });
-
-  //   DUMMY_PLACES.push(createdPlace); //unshift(createPlace)
 
   let user;
   try {
@@ -145,9 +113,6 @@ const updatePlace = async (req, res, next) => {
   const { title, description } = req.body; //data part of req body
   const placeId = req.params.pid; //data part of params
 
-  //   const updatedPlace = { ...DUMMY_PLACES.find((p) => p.id === placeId) }; //using spread operator to create a copy==creates a new obj and copies the old obj into the new one
-  //   const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
-
   let place;
   try {
     place = await Place.findById(placeId);
@@ -159,11 +124,14 @@ const updatePlace = async (req, res, next) => {
     return next(error);
   }
 
+  if (place.creator.toString() !== req.userData.userId) {
+    const error = new HttpError("You are not allowed to edit this place", 401);
+    return next(error);
+  }
+
   //const stores the address of the obj and not the obj itself
   place.title = title;
   place.description = description;
-
-  //   DUMMY_PLACES[placeIndex] = updatedPlace;
 
   try {
     await place.save();
@@ -177,11 +145,6 @@ const updatePlace = async (req, res, next) => {
 
 const deletePlace = async (req, res, next) => {
   const placeId = req.params.pid;
-  //   if (!DUMMY_PLACES.find((p) => p.id === placeId)) {
-  //     throw new HttpError("could not find place", 404);
-  //   }
-  //   DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.pid !== placeId);
-
   let place;
   try {
     place = await Place.findById(placeId).populate("creator");
@@ -192,6 +155,11 @@ const deletePlace = async (req, res, next) => {
 
   if (!place) {
     const error = new HttpError("could not find place", 404);
+    return next(error);
+  }
+
+  if (place.creator.id !== req.userData.userId) {
+    const error = new HttpError("You are not allowed to edit this place", 401);
     return next(error);
   }
 
